@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -11,7 +11,6 @@ from llm_physics_benchmark.judge import judge_response
 from llm_physics_benchmark.model_lists import CONSUMER_MODELS, HIGHEND_MODELS, TIER_MAP
 from llm_physics_benchmark.models import JudgeScore, ModelResponse
 from llm_physics_benchmark.runner import _build_summary
-
 
 # ── model_lists ───────────────────────────────────────────────────────────────
 

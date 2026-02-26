@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Optional
 
 import requests
 
@@ -67,8 +66,8 @@ class OllamaClient:
 
         answer_chunks: list[str] = []
         prompt_tokens = response_tokens = 0
-        time_to_first_token: Optional[float] = None
-        error: Optional[str] = None
+        time_to_first_token: float | None = None
+        error: str | None = None
         start = time.perf_counter()
 
         try:
