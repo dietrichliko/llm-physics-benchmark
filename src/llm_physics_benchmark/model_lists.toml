@@ -1,0 +1,33 @@
+# Curated model lists for different hardware tiers.
+# Edit this file to add, remove, or reorder models without touching Python code.
+
+[judge]
+default = "qwen2.5:7b"  # lightweight but accurate
+
+[tiers.consumer]
+# Models that fit in ≤12 GB VRAM
+models = [
+    "llama3.2:3b",      # ~2 GB  — fast baseline
+    "llama3.1:8b",      # ~5 GB  — good all-rounder
+    "mistral:7b",       # ~5 GB  — strong instruction following
+    "gemma2:9b",        # ~6 GB  — Google, strong STEM
+    "qwen2.5:7b",       # ~5 GB  — Alibaba, excellent science
+    "phi4:14b",         # ~9 GB  — Microsoft, compact but capable
+    "deepseek-r1:8b",   # ~5 GB  — chain-of-thought reasoning
+    "qwen3.5:35b-a3b",  # ~3 GB active (35B MoE) — Alibaba, strong reasoning
+]
+
+[tiers.highend]
+# Models for high-end / DGX Spark (≥40 GB unified memory)
+models = [
+    "qwq:32b",               # ~20 GB — QwQ reasoning model
+    "deepseek-r1:32b",       # ~20 GB — DeepSeek reasoning 32B
+    "llama3.3:70b",          # ~40 GB — Meta flagship 70B
+    "qwen2.5:72b",           # ~41 GB — Alibaba 72B
+    "deepseek-r1:70b",       # ~40 GB — DeepSeek reasoning 70B
+    "mistral-large:latest",  # ~47 GB — Mistral Large 2
+    "command-r-plus:latest", # ~59 GB — Cohere Command R+
+    "mixtral:8x22b",         # ~80 GB — Mistral MoE (needs 2× GPU or offload)
+    "qwen3.5:27b",           # ~15 GB — Alibaba Qwen3.5 27B dense
+    "qwen3.5:122b-a10b",     # ~65 GB — Alibaba Qwen3.5 122B MoE (10B active)
+]

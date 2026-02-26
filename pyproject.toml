@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llm-physics-benchmark"
+version = "0.1.0"
+description = "Benchmark local LLMs on expert-level particle physics questions via Ollama"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Dietrich Liko", email = "Dietrich.Liko@oeaw.ac.at" }]
+keywords = ["llm", "benchmark", "particle-physics", "ollama", "cms", "cern"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+requires-python = ">=3.11"
+dependencies = ["requests>=2.31.0", "rich>=13.7.0"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
+    "pre-commit>=3.7.0",
+    "commitizen>=3.29.0",
+]
+
+[project.scripts]
+physics-bench = "llm_physics_benchmark.cli:main"
+physics-report = "llm_physics_benchmark.report:main"
+
+[project.urls]
+Repository = "https://github.com/youruser/llm-physics-benchmark"
+Issues = "https://github.com/youruser/llm-physics-benchmark/issues"
+
+# ── commitizen ────────────────────────────────────────────────────────────────
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_scheme = "semver"
+
+# ── ruff ──────────────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+# ── mypy ──────────────────────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true
+
+# ── pytest ────────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--tb=short"
+
+# ── hatch ─────────────────────────────────────────────────────────────────────
+[tool.hatch.build.targets.wheel]
+packages = ["src/llm_physics_benchmark"]
