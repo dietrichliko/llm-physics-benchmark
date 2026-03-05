@@ -1,0 +1,15 @@
+# Local development config for Cloudflare Pages + D1
+# Production bindings are configured in the Cloudflare dashboard.
+#
+# Usage:
+#   wrangler pages dev . --d1=DB          (serve locally with D1)
+#   wrangler d1 execute physics-benchmark --local --file=schema.sql
+
+name = "physics-benchmark"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding     = "DB"
+database_name = "physics-benchmark"
+database_id   = "YOUR_D1_DATABASE_ID"   # replace after: wrangler d1 create physics-benchmark

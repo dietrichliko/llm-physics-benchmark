@@ -23,6 +23,9 @@ results/*.json
 results/*.html
 !results/.gitkeep
 
+# Web tool — generated from YAML at build time, not committed
+web/questions.json
+
 # IDE
 .vscode/
 .idea/

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Physics Benchmark Review</title>
+<style>
+/* ── Variables ─────────────────────────────────────────────────────────── */
+:root {
+  --bg:          #0d1117;
+  --surface:     #161b22;
+  --surface2:    #1f2937;
+  --border:      #2d3748;
+  --text:        #e2e8f0;
+  --muted:       #718096;
+  --accent:      #4299e1;
+  --accent2:     #7f6ff0;
+  --easy:        #48bb78;
+  --medium:      #ed8936;
+  --hard:        #fc5c65;
+  --trap:        #e040fb;
+  --bio:         #26c6da;
+  --success:     #38a169;
+  --radius:      8px;
+  --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── Reset ─────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans);
+       min-height: 100vh; line-height: 1.6; }
+button { font-family: var(--sans); cursor: pointer; }
+a { color: var(--accent); text-decoration: none; }
+
+/* ── Header ────────────────────────────────────────────────────────────── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+header h1 {
+  font-size: 17px;
+  font-weight: 700;
+  background: linear-gradient(120deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.3px;
+}
+.header-right { display: flex; align-items: center; gap: 14px; }
+.user-chip {
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+.progress-chip {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 14px;
+}
+.export-link {
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  background: none;
+  transition: border-color .15s, color .15s;
+}
+.export-link:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Main ──────────────────────────────────────────────────────────────── */
+main { max-width: 1440px; margin: 0 auto; padding: 28px 24px; }
+
+/* ── Filters ───────────────────────────────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.search-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 8px 14px;
+  font-size: 14px;
+  flex: 1;
+  min-width: 220px;
+}
+.search-input:focus { outline: none; border-color: var(--accent); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  padding: 5px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  transition: all .15s;
+  white-space: nowrap;
+}
+.chip:hover { border-color: var(--accent); color: var(--text); }
+.chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.filter-count { font-size: 13px; color: var(--muted); align-self: center; }
+
+/* ── Grid ──────────────────────────────────────────────────────────────── */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+
+/* ── Card ──────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  cursor: pointer;
+  transition: transform .18s, border-color .18s, box-shadow .18s;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: transparent;
+  transition: background .18s;
+}
+.card:hover { transform: translateY(-2px); border-color: var(--accent);
+              box-shadow: 0 8px 24px rgba(66,153,225,.15); }
+.card:hover::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.card.graded { border-color: var(--success); }
+.card.graded::before { background: var(--success); }
+
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+.card-id { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 700; }
+.graded-mark { color: var(--success); font-size: 15px; flex-shrink: 0; }
+
+.badges { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+.badge {
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+.b-easy    { background: rgba(72,187,120,.18);  color: var(--easy); }
+.b-medium  { background: rgba(237,137,54,.18);  color: var(--medium); }
+.b-hard    { background: rgba(252,92,101,.18);  color: var(--hard); }
+.b-type    { background: rgba(66,153,225,.12);  color: var(--accent); }
+.b-trap    { background: rgba(224,64,251,.15);  color: var(--trap); }
+.b-bio     { background: rgba(38,198,218,.15);  color: var(--bio); }
+.b-domain  { background: var(--surface2); color: var(--muted);
+             font-weight: 400; text-transform: none; font-size: 10px; }
+
+.card-summary {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-grade-preview { margin-top: 10px; font-size: 11px; color: var(--muted); }
+
+/* ── Detail ────────────────────────────────────────────────────────────── */
+.back-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .15s;
+  margin-bottom: 22px;
+}
+.back-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.detail-meta { margin-bottom: 20px; }
+.detail-meta .badges { margin-bottom: 8px; }
+.detail-id { font-family: var(--mono); font-size: 15px; font-weight: 700;
+             color: var(--accent); margin-bottom: 12px; }
+.nav-row { display: flex; gap: 8px; }
+.nav-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  transition: all .15s;
+}
+.nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.nav-btn:disabled { opacity: .35; cursor: default; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 18px;
+}
+.panel-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.qtext { font-family: var(--mono); font-size: 14px; line-height: 1.85; white-space: pre-wrap; }
+.atext { font-family: var(--mono); font-size: 13px; line-height: 1.85; white-space: pre-wrap; }
+.answer-panel { border-color: rgba(66,153,225,.3); }
+
+.reveal-btn {
+  width: 100%;
+  background: linear-gradient(120deg, var(--accent), var(--accent2));
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 600;
+  transition: opacity .15s;
+  margin-bottom: 18px;
+}
+.reveal-btn:hover { opacity: .88; }
+
+/* ── Grade form ─────────────────────────────────────────────────────────── */
+.grade-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+.grade-panel h3 { font-size: 15px; font-weight: 600; margin-bottom: 22px; }
+
+.gfield { margin-bottom: 22px; }
+.gfield > label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+/* Stars */
+.stars { display: flex; align-items: center; gap: 6px; }
+.star {
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--border);
+  transition: color .1s, transform .1s;
+  user-select: none;
+  line-height: 1;
+}
+.star.lit { color: var(--medium); }
+.star:hover { transform: scale(1.15); }
+.star-label { font-size: 13px; color: var(--muted); margin-left: 6px; }
+
+/* Choice buttons */
+.choices { display: flex; gap: 8px; }
+.choice {
+  flex: 1;
+  padding: 10px 6px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 13px;
+  transition: all .15s;
+  text-align: center;
+}
+.choice:hover { border-color: var(--accent); color: var(--text); }
+.choice.sel-yes     { background: rgba(72,187,120,.18);  border-color: var(--easy);   color: var(--easy); }
+.choice.sel-partial { background: rgba(237,137,54,.18);  border-color: var(--medium); color: var(--medium); }
+.choice.sel-no      { background: rgba(252,92,101,.18);  border-color: var(--hard);   color: var(--hard); }
+
+/* Notes */
+.notes-ta {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 12px;
+  font-size: 13px;
+  font-family: var(--sans);
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.6;
+}
+.notes-ta:focus { outline: none; border-color: var(--accent); }
+
+/* Submit */
+.submit-btn {
+  width: 100%;
+  background: var(--success);
+  color: #fff;
+  border: none;
+  padding: 13px;
+  border-radius: var(--radius);
+  font-size: 15px;
+  font-weight: 600;
+  transition: opacity .15s;
+  margin-top: 4px;
+}
+.submit-btn:hover { opacity: .9; }
+.submit-btn:disabled { opacity: .45; cursor: default; }
+.save-ok { margin-top: 12px; font-size: 13px; font-weight: 600;
+           color: var(--easy); display: flex; align-items: center; gap: 6px; }
+
+/* ── Misc ──────────────────────────────────────────────────────────────── */
+.spinner { display: flex; align-items: center; justify-content: center;
+           height: 220px; color: var(--muted); font-size: 15px; }
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  main  { padding: 16px; }
+  .choices { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>&#x269B; Physics Benchmark Review</h1>
+  <div class="header-right">
+    <span class="user-chip" id="user-chip">loading…</span>
+    <span class="progress-chip" id="progress-chip">– / –</span>
+    <a class="export-link" href="/api/grades/export" target="_blank">Export CSV</a>
+  </div>
+</header>
+
+<main id="root">
+  <div class="spinner">Loading questions…</div>
+</main>
+
+<script>
+// ─── State ─────────────────────────────────────────────────────────────────
+const S = {
+  qs:     [],        // all questions
+  grades: {},        // question_id → grade object (current user)
+  user:   null,
+  filter: { search: '', difficulty: 'all', type: 'all', graded: 'all' },
+  // detail view state
+  revealed: false,
+  form: { difficulty_rating: 0, question_valid: '', answer_valid: '', notes: '' },
+};
+
+// ─── Routing ───────────────────────────────────────────────────────────────
+function route() {
+  const hash = location.hash.slice(1) || '/';
+  if (hash.startsWith('/q/')) {
+    const id = hash.slice(3);
+    const q  = S.qs.find(q => q.id === id);
+    if (q) { S.revealed = false; renderDetail(q); return; }
+  }
+  renderOverview();
+}
+window.addEventListener('hashchange', route);
+
+// ─── API ───────────────────────────────────────────────────────────────────
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function loadUser() {
+  try {
+    S.user = await api('/api/me');
+    document.getElementById('user-chip').textContent = S.user.email;
+  } catch { document.getElementById('user-chip').textContent = 'unknown'; }
+}
+
+async function loadGrades() {
+  try {
+    const { grades } = await api('/api/grades');
+    S.grades = {};
+    for (const g of grades) S.grades[g.question_id] = g;
+    updateProgress();
+  } catch { /* ignore */ }
+}
+
+async function saveGrade(qid) {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const { grade } = await api('/api/grades', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ question_id: qid, ...S.form }),
+    });
+    S.grades[qid] = grade;
+    updateProgress();
+    renderGradeForm(qid, /* saved= */ true);
+  } catch {
+    btn.disabled = false;
+    btn.textContent = 'Save Grade';
+  }
+}
+
+// ─── Progress ──────────────────────────────────────────────────────────────
+function updateProgress() {
+  const graded = Object.keys(S.grades).length;
+  const total  = S.qs.length;
+  document.getElementById('progress-chip').textContent = `${graded} / ${total} graded`;
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+const DIFF_LABEL = ['','Trivial','Easy','Medium','Hard','Expert'];
+
+function diffBadge(d)  { return `<span class="badge b-${d}">${d}</span>`; }
+function typeBadge(t, id) {
+  if (id?.startsWith('trap_')) return `<span class="badge b-trap">trap</span>`;
+  if (id?.startsWith('bio_'))  return `<span class="badge b-bio">biography</span>`;
+  return `<span class="badge b-type">${t}</span>`;
+}
+function domainBadge(d) { return `<span class="badge b-domain">${esc(d)}</span>`; }
+
+// ─── Overview ──────────────────────────────────────────────────────────────
+function renderOverview() {
+  const { search, difficulty, type, graded } = S.filter;
+
+  const filtered = S.qs.filter(q => {
+    if (difficulty !== 'all' && q.difficulty !== difficulty)          return false;
+    if (type       !== 'all' && !qMatchesType(q, type))              return false;
+    if (graded === 'graded'   && !S.grades[q.id])                    return false;
+    if (graded === 'ungraded' &&  S.grades[q.id])                    return false;
+    if (search) {
+      const hay = (q.id + q.domain + q.summary).toLowerCase();
+      if (!hay.includes(search.toLowerCase())) return false;
+    }
+    return true;
+  });
+
+  const types = ['all', ...new Set(S.qs.map(q => normaliseType(q)))];
+  const diffs = ['all', 'easy', 'medium', 'hard'];
+
+  root().innerHTML = `
+    <div class="filter-bar">
+      <input class="search-input" id="fsearch" type="text"
+             placeholder="Search by ID, domain, or keywords…"
+             value="${esc(search)}">
+      <div class="chips" id="diff-chips">
+        ${diffs.map(d => chip(d, difficulty === d, 'data-diff')).join('')}
+      </div>
+      <div class="chips" id="type-chips">
+        ${types.map(t => chip(t === 'all' ? 'all types' : t, type === t, 'data-type', t)).join('')}
+      </div>
+      <div class="chips" id="graded-chips">
+        ${['all','graded','ungraded'].map(g => chip(g, graded === g, 'data-graded')).join('')}
+      </div>
+      <span class="filter-count">${filtered.length} / ${S.qs.length}</span>
+    </div>
+    <div class="grid" id="grid">
+      ${filtered.map(renderCard).join('')}
+    </div>`;
+
+  // Events
+  document.getElementById('fsearch').addEventListener('input', e => {
+    S.filter.search = e.target.value; renderOverview();
+  });
+  on('[data-diff]',   el => { S.filter.difficulty = el.dataset.diff;   renderOverview(); });
+  on('[data-type]',   el => { S.filter.type       = el.dataset.type;   renderOverview(); });
+  on('[data-graded]', el => { S.filter.graded     = el.dataset.graded; renderOverview(); });
+  on('.card',         el => { location.hash = '/q/' + el.dataset.id; });
+}
+
+function qMatchesType(q, filterType) {
+  if (filterType === 'trap' && q.id.startsWith('trap_')) return true;
+  if (filterType === 'biography' && q.id.startsWith('bio_')) return true;
+  return q.type === filterType;
+}
+
+function normaliseType(q) {
+  if (q.id.startsWith('trap_')) return 'trap';
+  if (q.id.startsWith('bio_'))  return 'biography';
+  return q.type;
+}
+
+function chip(label, active, attr, value) {
+  const val = value ?? label;
+  return `<span class="chip ${active ? 'active' : ''}" ${attr}="${esc(val)}">${esc(label)}</span>`;
+}
+
+function renderCard(q) {
+  const g       = S.grades[q.id];
+  const isGraded = !!g;
+  const stars    = g?.difficulty_rating
+    ? '&#9733;'.repeat(g.difficulty_rating) + '&#9734;'.repeat(5 - g.difficulty_rating)
+    : '';
+  return `
+    <div class="card ${isGraded ? 'graded' : ''}" data-id="${q.id}">
+      <div class="card-top">
+        <span class="card-id">${q.id}</span>
+        ${isGraded ? '<span class="graded-mark" title="Graded">&#10003;</span>' : ''}
+      </div>
+      <div class="badges">
+        ${diffBadge(q.difficulty)}
+        ${typeBadge(q.type, q.id)}
+        ${domainBadge(q.domain)}
+      </div>
+      <p class="card-summary">${esc(q.summary)}</p>
+      ${isGraded && stars ? `<div class="card-grade-preview">${stars}</div>` : ''}
+    </div>`;
+}
+
+// ─── Detail ────────────────────────────────────────────────────────────────
+function renderDetail(q) {
+  const idx  = S.qs.indexOf(q);
+  const prev = S.qs[idx - 1];
+  const next = S.qs[idx + 1];
+
+  // Pre-populate form from existing grade
+  const eg = S.grades[q.id];
+  S.form = eg
+    ? { difficulty_rating: eg.difficulty_rating ?? 0,
+        question_valid:     eg.question_valid    ?? '',
+        answer_valid:       eg.answer_valid      ?? '',
+        notes:              eg.notes             ?? '' }
+    : { difficulty_rating: 0, question_valid: '', answer_valid: '', notes: '' };
+
+  root().innerHTML = `
+    <button class="back-btn" id="back-btn">&#8592; Overview</button>
+
+    <div class="detail-meta">
+      <div class="badges">
+        ${diffBadge(q.difficulty)} ${typeBadge(q.type, q.id)} ${domainBadge(q.domain)}
+      </div>
+      <div class="detail-id">${q.id}</div>
+      <div class="nav-row">
+        <button class="nav-btn" id="nav-prev" ${!prev ? 'disabled' : ''}>&#8592; Prev</button>
+        <button class="nav-btn" id="nav-next" ${!next ? 'disabled' : ''}>Next &#8594;</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Question</div>
+      <div class="qtext">${esc(q.question)}</div>
+    </div>
+
+    <div id="answer-slot">
+      <button class="reveal-btn" id="reveal-btn">Reveal Reference Answer</button>
+    </div>
+
+    <div id="grade-slot">${buildGradeForm(q.id)}</div>`;
+
+  document.getElementById('back-btn').addEventListener('click', () => { location.hash = '/'; });
+  if (prev) document.getElementById('nav-prev').addEventListener('click', () => { location.hash = '/q/' + prev.id; });
+  if (next) document.getElementById('nav-next').addEventListener('click', () => { location.hash = '/q/' + next.id; });
+
+  document.getElementById('reveal-btn').addEventListener('click', () => {
+    S.revealed = true;
+    document.getElementById('answer-slot').innerHTML = `
+      <div class="panel answer-panel">
+        <div class="panel-label">Reference Answer</div>
+        <div class="atext">${esc(q.reference_answer)}</div>
+      </div>`;
+  });
+
+  bindGradeForm(q.id);
+  window._keyNav = handleArrows;
+  document.addEventListener('keydown', window._keyNav);
+}
+
+function handleArrows(e) {
+  const hash = location.hash.slice(1);
+  if (!hash.startsWith('/q/')) return;
+  const id  = hash.slice(3);
+  const idx = S.qs.findIndex(q => q.id === id);
+  if (e.key === 'ArrowLeft'  && idx > 0)                location.hash = '/q/' + S.qs[idx - 1].id;
+  if (e.key === 'ArrowRight' && idx < S.qs.length - 1)  location.hash = '/q/' + S.qs[idx + 1].id;
+}
+
+// ─── Grade form ────────────────────────────────────────────────────────────
+function buildGradeForm(qid, saved = false) {
+  const f       = S.form;
+  const isGraded = !!S.grades[qid];
+
+  const starsHtml = [1,2,3,4,5].map(i =>
+    `<span class="star ${f.difficulty_rating >= i ? 'lit' : ''}" data-star="${i}">&#9733;</span>`
+  ).join('');
+
+  return `
+    <div class="grade-panel">
+      <h3>${isGraded ? '&#10003; Your Grade &mdash; update below' : 'Grade this Question'}</h3>
+
+      <div class="gfield">
+        <label>Difficulty (your assessment)</label>
+        <div class="stars" id="stars">
+          ${starsHtml}
+          <span class="star-label" id="star-label">${DIFF_LABEL[f.difficulty_rating] || ''}</span>
+        </div>
+      </div>
+
+      <div class="gfield">
+        <label>Is the question well-posed and correct?</label>
+        <div class="choices" id="qv-choices">
+          ${choiceBtn('yes',     'question_valid', f.question_valid, '&#10003; Yes')}
+          ${choiceBtn('partial', 'question_valid', f.question_valid, '&#126; Partially')}
+          ${choiceBtn('no',      'question_valid', f.question_valid, '&#10007; Issues')}
+        </div>
+      </div>
+
+      <div class="gfield">
+        <label>Is the reference answer correct and complete?</label>
+        <div class="choices" id="av-choices">
+          ${choiceBtn('yes',     'answer_valid', f.answer_valid, '&#10003; Yes')}
+          ${choiceBtn('partial', 'answer_valid', f.answer_valid, '&#126; Partially')}
+          ${choiceBtn('no',      'answer_valid', f.answer_valid, '&#10007; Issues')}
+        </div>
+      </div>
+
+      <div class="gfield">
+        <label>Notes / Corrections</label>
+        <textarea class="notes-ta" id="notes"
+          placeholder="Corrections, comments, suggested improvements…">${esc(f.notes)}</textarea>
+      </div>
+
+      <button class="submit-btn" id="submit-btn">
+        ${isGraded ? 'Update Grade' : 'Save Grade'}
+      </button>
+      ${saved ? '<div class="save-ok">&#10003; Grade saved</div>' : ''}
+    </div>`;
+}
+
+function renderGradeForm(qid, saved = false) {
+  document.getElementById('grade-slot').innerHTML = buildGradeForm(qid, saved);
+  bindGradeForm(qid);
+}
+
+function choiceBtn(val, field, current, label) {
+  const sel = current === val ? `sel-${val}` : '';
+  return `<button class="choice ${sel}" data-field="${field}" data-val="${val}">${label}</button>`;
+}
+
+function bindGradeForm(qid) {
+  // Stars
+  const starsEl = document.getElementById('stars');
+  starsEl?.querySelectorAll('[data-star]').forEach(el => {
+    const n = parseInt(el.dataset.star);
+    el.addEventListener('click', () => {
+      S.form.difficulty_rating = n;
+      starsEl.querySelectorAll('[data-star]').forEach((s, i) =>
+        s.classList.toggle('lit', i < n));
+      document.getElementById('star-label').textContent = DIFF_LABEL[n] || '';
+    });
+    el.addEventListener('mouseenter', () =>
+      starsEl.querySelectorAll('[data-star]').forEach((s, i) =>
+        s.style.color = i < n ? 'var(--medium)' : ''));
+  });
+  starsEl?.addEventListener('mouseleave', () =>
+    starsEl.querySelectorAll('[data-star]').forEach((s, i) =>
+      s.style.color = i < S.form.difficulty_rating ? 'var(--medium)' : ''));
+
+  // Choice buttons
+  document.querySelectorAll('.choice').forEach(el => {
+    el.addEventListener('click', () => {
+      const { field, val } = el.dataset;
+      S.form[field] = val;
+      const group = el.closest('.choices');
+      group.querySelectorAll('.choice').forEach(b => {
+        b.className = `choice ${b.dataset.val === val ? `sel-${val}` : ''}`;
+      });
+    });
+  });
+
+  // Notes
+  document.getElementById('notes')?.addEventListener('input', e => {
+    S.form.notes = e.target.value;
+  });
+
+  // Submit
+  document.getElementById('submit-btn')?.addEventListener('click', () => saveGrade(qid));
+}
+
+// ─── Misc helpers ──────────────────────────────────────────────────────────
+function root() { return document.getElementById('root'); }
+
+function on(selector, handler) {
+  document.querySelectorAll(selector).forEach(el =>
+    el.addEventListener('click', () => handler(el)));
+}
+
+// ─── Boot ──────────────────────────────────────────────────────────────────
+async function init() {
+  const [_, data] = await Promise.all([
+    loadUser(),
+    fetch('/questions.json').then(r => r.json()),
+    loadGrades(),
+  ]);
+  S.qs = data.questions;
+  updateProgress();
+  route();
+}
+
+init();
+</script>
+</body>
+</html>
