@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import argparse
 import sys
-import tomllib
 from pathlib import Path
 
+import yaml
 from rich.console import Console
 
 from llm_physics_benchmark.client import OllamaClient
@@ -16,7 +16,7 @@ from llm_physics_benchmark.runner import run_benchmark
 console = Console()
 
 _DATA_DIR = Path(__file__).parent.parent.parent / "data"
-_DEFAULT_QA = _DATA_DIR / "physics_qa_bank.toml"
+_DEFAULT_QA = _DATA_DIR / "physics_qa_bank.yaml"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -52,7 +52,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--questions",
         default=str(_DEFAULT_QA),
         metavar="FILE",
-        help=f"Path to Q&A TOML file (default: {_DEFAULT_QA})",
+        help=f"Path to Q&A YAML file (default: {_DEFAULT_QA})",
     )
     p.add_argument(
         "--output-dir",
@@ -110,8 +110,8 @@ def main() -> None:
     if not qa_path.exists():
         console.print(f"[red]Questions file not found: {qa_path}[/red]")
         sys.exit(1)
-    with open(qa_path, "rb") as f:
-        questions = tomllib.load(f)["questions"]
+    with open(qa_path) as f:
+        questions = yaml.safe_load(f)["questions"]
 
     # Check Ollama connectivity
     try:

@@ -30,11 +30,11 @@ def test_no_duplicates_within_tier():
 # ── qa bank ───────────────────────────────────────────────────────────────────
 
 def test_qa_bank_loads():
-    import tomllib
-    qa_path = Path(__file__).parent.parent / "data" / "physics_qa_bank.toml"
-    assert qa_path.exists(), "physics_qa_bank.toml not found in data/"
-    with open(qa_path, "rb") as f:
-        data = tomllib.load(f)
+    import yaml
+    qa_path = Path(__file__).parent.parent / "data" / "physics_qa_bank.yaml"
+    assert qa_path.exists(), "physics_qa_bank.yaml not found in data/"
+    with open(qa_path) as f:
+        data = yaml.safe_load(f)
     assert "questions" in data
     assert len(data["questions"]) >= 1
     for q in data["questions"]:

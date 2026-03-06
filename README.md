@@ -29,7 +29,7 @@ llm-physics-benchmark/
 │   ├── model_lists.py           # consumer / high-end model lists
 │   └── models.py                # dataclasses
 ├── data/
-│   └── physics_qa_bank.toml     # 70 Q&A pairs (12 topic areas)
+│   └── physics_qa_bank.yaml     # 70 Q&A pairs (12 topic areas)
 ├── results/                     # benchmark outputs (gitignored)
 ├── tests/
 │   └── test_benchmark.py
@@ -318,7 +318,7 @@ All results go to `./results/` (configurable via `--output-dir`):
 
 ## Adding custom questions
 
-Edit `data/physics_qa_bank.toml`:
+Edit `data/physics_qa_bank.yaml`:
 
 ```toml
 [[questions]]

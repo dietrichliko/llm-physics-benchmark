@@ -1,9 +1,9 @@
 """Load curated model lists from model_lists.toml."""
 
-import importlib.resources
 import tomllib
+from pathlib import Path
 
-_toml = importlib.resources.files(__package__).joinpath("model_lists.toml")
+_toml = Path(__file__).parent.parent.parent / "config" / "model_lists.toml"
 with _toml.open("rb") as _f:
     _config = tomllib.load(_f)
 
