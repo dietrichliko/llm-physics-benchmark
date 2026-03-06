@@ -71,6 +71,7 @@ class OllamaClient:
         }
 
         answer_chunks: list[str] = []
+        thinking_chunks: list[str] = []
         prompt_tokens = response_tokens = 0
         time_to_first_token: float | None = None
         error: str | None = None
@@ -89,9 +90,12 @@ class OllamaClient:
                         continue
                     chunk = json.loads(raw_line)
                     token_text: str = chunk.get("response", "")
-                    if token_text and time_to_first_token is None:
+                    thinking_text_chunk: str = chunk.get("thinking", "")
+                    if (token_text or thinking_text_chunk) and time_to_first_token is None:
                         time_to_first_token = time.perf_counter() - start
                     answer_chunks.append(token_text)
+                    if thinking_text_chunk:
+                        thinking_chunks.append(thinking_text_chunk)
                     if chunk.get("done"):
                         prompt_tokens = chunk.get("prompt_eval_count", 0)
                         response_tokens = chunk.get("eval_count", 0)
@@ -100,7 +104,15 @@ class OllamaClient:
             error = str(exc)
 
         total_time = time.perf_counter() - start
-        answer = "".join(answer_chunks)
+        response_text = "".join(answer_chunks)
+        thinking_text = "".join(thinking_chunks)
+        if response_text and thinking_text:
+            answer = f"<think>\n{thinking_text}\n</think>\n\n{response_text}"
+        elif thinking_text:
+            # Thinking model used entire token budget on CoT; use thinking as answer
+            answer = thinking_text
+        else:
+            answer = response_text
         tps = response_tokens / total_time if total_time > 0 else 0.0
         ttft = time_to_first_token or total_time
 

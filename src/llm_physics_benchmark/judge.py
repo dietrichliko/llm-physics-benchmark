@@ -75,7 +75,10 @@ def judge_response(
         json_match = re.search(r"\{.*?\}", raw, re.DOTALL)
         if json_match:
             try:
-                data = json.loads(json_match.group())
+                raw_json = json_match.group()
+                # Fix invalid JSON escape sequences (e.g. LaTeX \( \) \text{} in reasoning)
+                raw_json = re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', raw_json)
+                data = json.loads(raw_json)
                 accuracy = max(0, min(10, int(data.get("accuracy", 0))))
                 completeness = max(0, min(10, int(data.get("completeness", 0))))
                 clarity = max(0, min(10, int(data.get("clarity", 0))))
