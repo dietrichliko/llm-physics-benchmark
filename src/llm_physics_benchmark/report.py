@@ -82,7 +82,7 @@ def generate_html(responses: list, scores: list, summary: dict, run_id: str) -> 
             r = resp_lut.get((model, qid))
             s = score_lut.get((model, qid))
 
-            answer = (r["answer"][:500] + "…") if r and r.get("answer") else "N/A"
+            answer = r["answer"] if r and r.get("answer") else "N/A"
             answer = answer.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             reasoning = ""
             if s and s.get("judge_reasoning"):

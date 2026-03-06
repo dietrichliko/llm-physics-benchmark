@@ -47,6 +47,8 @@ class OllamaClient:
         system: str = "",
         temperature: float = 0.1,
         max_tokens: int = 1024,
+        num_ctx: int = 8192,
+        num_batch: int = 1024,
     ) -> ModelResponse:
         """
         Send *prompt* to Ollama /api/generate (streaming) and collect metrics.
@@ -61,6 +63,10 @@ class OllamaClient:
             "options": {
                 "temperature": temperature,
                 "num_predict": max_tokens,
+                "num_ctx": num_ctx,
+                "num_batch": num_batch,
+                "use_mlock": True,
+                "use_flash_attn": True,
             },
         }
 

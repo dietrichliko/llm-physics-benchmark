@@ -32,7 +32,7 @@ Respond ONLY in valid JSON, no extra text, no markdown fences:
   "completeness": <0-10>,
   "clarity": <0-10>,
   "depth": <0-10>,
-  "reasoning": "<1-3 sentence explanation>"
+  "reasoning": "<max 2 sentences, under 60 words>"
 }"""
 
 
@@ -44,6 +44,8 @@ def judge_response(
     model_answer: str,
     model_name: str,
     question_id: str,
+    num_ctx: int = 8192,
+    num_batch: int = 1024,
 ) -> JudgeScore:
     """Score *model_answer* against *reference_answer* using *judge_model*."""
 
@@ -59,7 +61,9 @@ def judge_response(
         prompt=prompt,
         system=JUDGE_SYSTEM,
         temperature=0.0,
-        max_tokens=512,
+        max_tokens=256,
+        num_ctx=num_ctx,
+        num_batch=num_batch,
     )
 
     accuracy = completeness = clarity = depth = 0

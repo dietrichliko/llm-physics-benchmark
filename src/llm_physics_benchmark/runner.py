@@ -31,6 +31,8 @@ def run_benchmark(
     skip_unavailable: bool = True,
     auto_pull: bool = False,
     max_tokens: int = 1200,
+    num_ctx: int = 8192,
+    num_batch: int = 1024,
 ) -> dict:
     """
     Run the full benchmark matrix (models × questions) and write result files.
@@ -70,10 +72,11 @@ def run_benchmark(
 
         console.rule(f"[bold blue]{model}")
 
+        # Phase 1: generate all responses (model stays loaded)
+        model_responses: list[ModelResponse] = []
         for q in questions:
             qid: str = q["id"]
             question_text: str = q["question"]
-            reference: str = q["reference_answer"]
 
             console.print(
                 f"  [cyan]{qid}[/cyan] [{q['domain']} / {q['difficulty']}] … ",
@@ -86,6 +89,8 @@ def run_benchmark(
                 system=PHYSICS_SYSTEM,
                 temperature=0.1,
                 max_tokens=max_tokens,
+                num_ctx=num_ctx,
+                num_batch=num_batch,
             )
             resp.question_id = qid
             resp.question = question_text
@@ -99,30 +104,38 @@ def run_benchmark(
                     f"{resp.response_tokens} tokens"
                 )
 
+            model_responses.append(resp)
             all_responses.append(resp)
             with open(responses_file, "a") as f:
                 f.write(json.dumps(dataclasses.asdict(resp)) + "\n")
 
-            # Judge
-            if not resp.error and resp.answer.strip():
-                console.print(f"    [dim]→ judging with {judge_model} …[/dim] ", end="")
-                score = judge_response(
-                    client, judge_model, question_text, reference,
-                    resp.answer, model, qid,
+        # Phase 2: judge all responses (judge model stays loaded)
+        console.rule(f"[dim]Judging {model} with {judge_model}[/dim]")
+        q_by_id = {q["id"]: q for q in questions}
+        for resp in model_responses:
+            if resp.error or not resp.answer.strip():
+                continue
+            q = q_by_id[resp.question_id]
+            console.print(f"  [dim]{resp.question_id} … [/dim]", end="")
+            score = judge_response(
+                client, judge_model, q["question"], q["reference_answer"],
+                resp.answer, model, resp.question_id,
+                num_ctx=num_ctx,
+                num_batch=num_batch,
+            )
+            if score.error:
+                console.print(f"[red]judge error: {score.error}[/red]")
+            else:
+                console.print(
+                    f"overall=[bold]{score.overall_score:.1f}[/bold]/10  "
+                    f"(acc={score.accuracy_score} "
+                    f"cmp={score.completeness_score} "
+                    f"clr={score.clarity_score} "
+                    f"dep={score.technical_depth_score})"
                 )
-                if score.error:
-                    console.print(f"[red]judge error: {score.error}[/red]")
-                else:
-                    console.print(
-                        f"overall=[bold]{score.overall_score:.1f}[/bold]/10  "
-                        f"(acc={score.accuracy_score} "
-                        f"cmp={score.completeness_score} "
-                        f"clr={score.clarity_score} "
-                        f"dep={score.technical_depth_score})"
-                    )
-                all_scores.append(score)
-                with open(scores_file, "a") as f:
-                    f.write(json.dumps(dataclasses.asdict(score)) + "\n")
+            all_scores.append(score)
+            with open(scores_file, "a") as f:
+                f.write(json.dumps(dataclasses.asdict(score)) + "\n")
 
     summary = _build_summary(all_responses, all_scores, models, questions)
     with open(summary_file, "w") as f:

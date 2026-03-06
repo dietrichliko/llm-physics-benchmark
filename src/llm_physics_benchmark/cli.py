@@ -67,6 +67,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Maximum tokens per response (default: 1200)",
     )
     p.add_argument(
+        "--num-ctx",
+        type=int,
+        default=8192,
+        help="Context window size in tokens (default: 8192)",
+    )
+    p.add_argument(
+        "--num-batch",
+        type=int,
+        default=1024,
+        help="Prompt-evaluation batch size (default: 1024)",
+    )
+    p.add_argument(
         "--pull",
         action="store_true",
         help="Auto-pull missing models from the Ollama registry",
@@ -130,6 +142,8 @@ def main() -> None:
         skip_unavailable=not args.no_skip,
         auto_pull=args.pull,
         max_tokens=args.max_tokens,
+        num_ctx=args.num_ctx,
+        num_batch=args.num_batch,
     )
 
 
