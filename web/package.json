@@ -1,0 +1,7 @@
+{
+  "name": "physics-benchmark-web",
+  "private": true,
+  "devDependencies": {
+    "wrangler": "^4.71.0"
+  }
+}

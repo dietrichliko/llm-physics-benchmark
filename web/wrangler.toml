@@ -10,6 +10,7 @@ compatibility_date = "2025-01-01"
 pages_build_output_dir = "."
 
 [[d1_databases]]
-binding     = "DB"
+binding = "physics_benchmark"
 database_name = "physics-benchmark"
-database_id   = "YOUR_D1_DATABASE_ID"   # replace after: wrangler d1 create physics-benchmark
+database_id = "92a283fb-3f84-4aa6-8c97-401614a30f89"
+

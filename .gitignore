@@ -25,6 +25,8 @@ results/*.html
 
 # Web tool — generated from YAML at build time, not committed
 web/questions.json
+web/node_modules/
+web/.wrangler/
 
 # IDE
 .vscode/

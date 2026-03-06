@@ -41,14 +41,15 @@ There are **two separate concerns**:
 ### Step 1 — Create a Cloudflare account and install Wrangler
 
 ```bash
-npm install -g wrangler
-wrangler login          # opens a browser → log in to your CF account
+cd web
+npm install             # installs wrangler locally into web/node_modules/
+npx wrangler login      # opens a browser → log in to your CF account
 ```
 
 ### Step 2 — Create the D1 database in Cloudflare's cloud
 
 ```bash
-wrangler d1 create physics-benchmark
+npx wrangler d1 create physics-benchmark
 ```
 
 Wrangler prints something like:
@@ -68,8 +69,7 @@ production binding is configured in the dashboard in Step 5.
 ### Step 3 — Create the grades table in the database
 
 ```bash
-# run from the repo root
-wrangler d1 execute physics-benchmark --file=web/schema.sql
+npx wrangler d1 execute physics-benchmark --remote --file=schema.sql
 ```
 
 This sends the SQL to Cloudflare and creates the `grades` table. Done —
@@ -154,10 +154,10 @@ the result. **You never touch `questions.json` manually.**
 
 ```bash
 # Apply schema to a local D1 copy
-wrangler d1 execute physics-benchmark --local --file=web/schema.sql
+npx wrangler d1 execute physics-benchmark --local --file=schema.sql
 
 # Serve the app locally (functions + static files)
-wrangler pages dev web --d1=DB
+npx wrangler pages dev . --d1=DB
 ```
 
 Open `http://localhost:8788`. Because there are no Cloudflare Access headers
@@ -184,7 +184,7 @@ identifier if emails change.
 You can also query the database directly from your laptop:
 
 ```bash
-wrangler d1 execute physics-benchmark \
+npx wrangler d1 execute physics-benchmark \
   --command "SELECT * FROM grades ORDER BY user_email, question_id"
 ```
 
